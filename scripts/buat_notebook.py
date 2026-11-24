@@ -32,7 +32,56 @@ dan **output-nya disimpan**, sehingga angka di laporan bisa diverifikasi
 langsung tanpa menjalankan ulang.
 """)
 
-md("## 0. Setup")
+md(r"""
+## 0. Persiapan lingkungan
+
+Kalau notebook ini dibuka di Colab, cell di bawah menyiapkan semuanya:
+clone repo, pindah ke foldernya, pasang `huggingface_hub`, lalu unduh dataset
+kalau belum ada.
+
+Kalau dijalankan di laptop, cell ini tidak melakukan apa-apa — langsung lanjut.
+
+**Penting:** `/content` di Colab terhapus setiap sesi berakhir. Dataset dan
+cache `.npy` akan hilang, tapi tidak masalah: unduh ulang ~2 menit dan
+praproses ulang 32 detik. Yang perlu disimpan ke Drive hanya hasil akhir
+tahap fitur (CSV kecil), bukan citranya.
+""")
+cd(r"""
+import sys
+import os
+from pathlib import Path
+
+DI_COLAB = "google.colab" in sys.modules
+print(f"Google Colab: {DI_COLAB}")
+
+if DI_COLAB:
+    REPO = Path("/content/Project-PCVK")
+    BRANCH = "radita"
+
+    if not REPO.exists():
+        print("Meng-clone repo ...")
+        os.system(
+            f"git clone -q -b {BRANCH} "
+            f"https://github.com/AhmadKevin000/Project-PCVK.git {REPO}"
+        )
+    if not REPO.exists():
+        raise RuntimeError(
+            "Clone gagal. Cek apakah branch sudah di-push ke GitHub, "
+            "atau pakai jalur manual (upload zip) di Docs/COLAB.md"
+        )
+
+    os.chdir(REPO)
+
+    os.system("pip -q install huggingface_hub")
+
+    jumlah = len(list((REPO / "sipakmed_raw").rglob("*.bmp"))) if (REPO / "sipakmed_raw").exists() else 0
+    if jumlah != 4049:
+        print(f"Dataset belum lengkap ({jumlah}/4049), mengunduh ...")
+        os.system("python scripts/unduh_dataset.py sipakmed_raw")
+
+    print(f"Siap di: {Path.cwd()}")
+""")
+
 cd(r"""
 import sys
 import time
