@@ -1,0 +1,26 @@
+VERIFIKASI DATASET SIPAKMED
+==================================================
+
+Sumber   : https://www.cs.uoi.gr/~marina/sipakmed.html
+Paper    : Plissiti et al. (2018), IEEE ICIP, doi:10.1109/ICIP.2018.8451389
+Lisensi  : Untuk keperluan penelitian, wajib menyitasi Plissiti et al. (2018). Lisensi terbuka (mis. CC BY) tidak dinyatakan.
+
+Sel tunggal (CROPPED/) : 4049 citra
+Citra klaster (root)   : 966 citra (tidak dipakai)
+Jumlah kelas           : 5
+
+  - im_Dyskeratotic: 813
+  - im_Koilocytotic: 825
+  - im_Metaplastic: 793
+  - im_Parabasal: 787
+  - im_Superficial-Intermediate: 831
+
+Format          : BMP
+Ukuran total    : 562.2 MB
+Resolusi median : 188x166 px
+Resolusi rentang: 62x48 sampai 531x553 px
+Keseimbangan    : SEIMBANG (rasio 1.056:1)
+ID pasien       : tidak tersedia
+ID klaster      : tersedia, pakai GroupKFold
+File rusak      : 0
+Hash vs resmi   : 10/10 cocok

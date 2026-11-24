@@ -1,0 +1,43 @@
+{
+  "nama_dataset": "SIPaKMeD (Single Cell Images of Cervical Cancer)",
+  "sumber": "University of Ioannina, Yunani",
+  "url": "https://www.cs.uoi.gr/~marina/sipakmed.html",
+  "paper": "Plissiti et al. (2018), IEEE ICIP, doi:10.1109/ICIP.2018.8451389",
+  "lisensi": "Untuk keperluan penelitian, wajib menyitasi Plissiti et al. (2018). Lisensi terbuka (mis. CC BY) tidak dinyatakan.",
+  "cara_unduh": "Mirror HuggingFace rjaditya/sipakmed-dataset, hanya CROPPED/*.bmp; hash 10 file diverifikasi identik dengan rilis resmi",
+  "jumlah_sel_tunggal": 4049,
+  "jumlah_klaster": 966,
+  "jumlah_kelas": 5,
+  "per_kelas": {
+    "im_Dyskeratotic": 813,
+    "im_Koilocytotic": 825,
+    "im_Metaplastic": 793,
+    "im_Parabasal": 787,
+    "im_Superficial-Intermediate": 831
+  },
+  "format": {
+    "BMP": 4049
+  },
+  "resolusi_sel_tunggal": {
+    "min": [
+      62,
+      48
+    ],
+    "median": [
+      188,
+      166
+    ],
+    "max": [
+      531,
+      553
+    ]
+  },
+  "ukuran_total_mb": 562.2,
+  "status_seimbang": "SEIMBANG",
+  "rasio_max_min": 1.056,
+  "id_klaster_tersedia": true,
+  "id_pasien_tersedia": false,
+  "file_tidak_terbaca": 0,
+  "hash_cocok": 10,
+  "hash_beda": 0
+}

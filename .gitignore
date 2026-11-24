@@ -1,0 +1,104 @@
+# ============================================================
+# Dataset SIPaKMeD
+# ============================================================
+# Arsip mentah dan hasil ekstraksi TIDAK masuk repo.
+# Ukuran total ~9,1 GB, jauh di atas batas wajar GitHub.
+# Dataset diunduh lewat download_dataset.py (lihat README).
+# Alasan lisensi: SIPaKMeD hanya untuk keperluan penelitian,
+# bukan untuk didistribusikan ulang sebagai mirror publik.
+
+sipakmed/
+sipakmed_flat/
+sipakmed.zip
+*.7z
+*.rar
+*.tar
+*.tar.gz
+*.tgz
+
+# Struktur folder dataset lain (jaga-jaga kalau nama folder berubah)
+im_Dyskeratotic/
+im_Koilocytotic/
+im_Metaplastic/
+im_Parabasal/
+im_Superficial-Intermediate/
+
+# Citra dataset: jangan pernah ke-commit
+# (hasil olahan tetap boleh, lihat bagian "Hasil" di bawah)
+**/CROPPED/
+*.bmp
+*.BMP
+
+# ============================================================
+# Hasil yang TETAP di-commit
+# ============================================================
+# File di bawah ini sengaja tidak di-ignore karena jadi bukti
+# untuk laporan (Tabel 8, confusion matrix, kurva evaluasi):
+#
+#   distribusi_sipakmed.png
+#   sample_citra_sipakmed.png
+#   verifikasi_dataset.txt
+#   confusion_matrix.png
+#   metrics.csv
+#
+# Jangan tambahkan *.png atau *.csv secara global.
+
+# Artefak sementara yang isinya bisa besar dan gampang dibuat ulang
+features_*.csv
+*.pkl
+*.joblib
+*.h5
+*.keras
+
+# ============================================================
+# Python
+# ============================================================
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Virtual environment
+.venv/
+venv/
+env/
+ENV/
+
+# ============================================================
+# Jupyter
+# ============================================================
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Output notebook yang bisa membengkak (biarkan .ipynb-nya)
+*.nbconvert.ipynb
+.ipynb_convert/
+
+# ============================================================
+# Google Colab / Drive
+# ============================================================
+/content/
+drive/
+sample_data/
+
+# ============================================================
+# macOS
+# ============================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+
+# ============================================================
+# Editor
+# ============================================================
+.vscode/
+.idea/
+*.swp
+*~
