@@ -1,0 +1,5 @@
+varian,mean,std,p1,p99,ketajaman,entropi,keterangan
+V0,138.051,29.913,76.863,193.15,9.671,6.461,resize + grayscale (baseline)
+V1,143.216,36.325,65.529,212.408,58.603,6.909,V0 + CLAHE
+V2,143.222,36.174,65.887,211.81,25.295,6.885,V1 + median filter (utama)
+V3,143.512,36.334,65.916,212.376,32.359,6.896,V0 + median + CLAHE (uji urutan)
