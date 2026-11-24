@@ -3,12 +3,13 @@
 # ============================================================
 # Arsip mentah dan hasil ekstraksi TIDAK masuk repo.
 # Ukuran total ~9,1 GB, jauh di atas batas wajar GitHub.
-# Dataset diunduh lewat download_dataset.py (lihat README).
+# Dataset diunduh lewat scripts/unduh_dataset.py
 # Alasan lisensi: SIPaKMeD hanya untuk keperluan penelitian,
 # bukan untuk didistribusikan ulang sebagai mirror publik.
 
 sipakmed/
 sipakmed_flat/
+sipakmed_raw/
 sipakmed.zip
 *.7z
 *.rar
@@ -45,6 +46,11 @@ im_Superficial-Intermediate/
 
 # Artefak sementara yang isinya bisa besar dan gampang dibuat ulang
 features_*.csv
+*.npy
+data/cache/
+# metadata.csv berisi path absolut komputer masing-masing; dibuat ulang
+# otomatis oleh notebooks/02_praproses.ipynb (bagian 2)
+data/metadata.csv
 *.pkl
 *.joblib
 *.h5
@@ -102,3 +108,8 @@ Icon?
 .idea/
 *.swp
 *~
+
+# Artefak gambar: isinya sudah tertanam di dalam notebook.
+# File biner tidak bisa di-merge, jadi jangan masuk repo.
+outputs/*.png
+outputs/*.html
