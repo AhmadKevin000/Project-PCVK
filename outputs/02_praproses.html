@@ -7796,7 +7796,7 @@ a.anchor-link {
 <!-- End of mermaid configuration --></head>
 <body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
 <main>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=9df06987">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=2a419cef">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7858,15 +7858,23 @@ langsung tanpa menjalankan ulang.</p>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=766f467b">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=2f7b3666">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="0.-Persiapan-lingkungan">0. Persiapan lingkungan<a class="anchor-link" href="#0.-Persiapan-lingkungan">¶</a></h2><p>Kalau notebook ini dibuka di Colab, cell di bawah menyiapkan semuanya:
-clone repo, pindah ke foldernya, pasang <code>huggingface_hub</code>, lalu unduh dataset
-kalau belum ada.</p>
+<h2 id="0.-Persiapan-lingkungan">0. Persiapan lingkungan<a class="anchor-link" href="#0.-Persiapan-lingkungan">¶</a></h2><p>Kalau notebook ini dibuka di Colab, cell di bawah menyiapkan lingkungan:
+menyediakan <code>src/</code>, memasang <code>huggingface_hub</code>, lalu mengunduh dataset kalau
+belum lengkap.</p>
+<p><strong>Clone repo tidak wajib.</strong> Cell ini punya dua mode:</p>
+<ol>
+<li><strong>Clone otomatis</strong> (default) — paling praktis, selalu dapat versi terbaru.</li>
+<li><strong>Unggah manual</strong> — kalau <code>src/dataset.py</code> dan <code>src/preprocessing.py</code> sudah
+diunggah ke <code>/content/src/</code>, cell ini memakai itu dan tidak meng-clone apa pun.</li>
+</ol>
+<p>Yang benar-benar wajib hanya tiga: dua modul di <code>src/</code>, dataset 4049 citra, dan
+notebook ini.</p>
 <p>Kalau dijalankan di laptop, cell ini tidak melakukan apa-apa — langsung lanjut.</p>
 <p><strong>Penting:</strong> <code>/content</code> di Colab terhapus setiap sesi berakhir. Dataset dan
 cache <code>.npy</code> akan hilang, tapi tidak masalah: unduh ulang ~2 menit dan
@@ -7875,7 +7883,7 @@ tahap fitur (CSV kecil), bukan citranya.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=e5d47e8f">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=55993726">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7893,27 +7901,48 @@ tahap fitur (CSV kecil), bukan citranya.</p>
 <span class="k">if</span> <span class="n">DI_COLAB</span><span class="p">:</span>
     <span class="n">REPO</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"/content/Project-PCVK"</span><span class="p">)</span>
     <span class="n">BRANCH</span> <span class="o">=</span> <span class="s2">"radita"</span>
+    <span class="n">URL</span> <span class="o">=</span> <span class="s2">"https://github.com/AhmadKevin000/Project-PCVK.git"</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">REPO</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+    <span class="c1"># Dua cara menyiapkan kode: clone repo, atau unggah src/ secara manual.</span>
+    <span class="c1"># Clone lebih praktis karena selalu dapat versi terbaru, tapi tidak wajib.</span>
+    <span class="k">if</span> <span class="n">REPO</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">REPO</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"Memakai repo hasil clone"</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"/content/src/dataset.py"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="s2">"/content"</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"Mode unggah manual: memakai /content/src"</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">"Meng-clone repo ..."</span><span class="p">)</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">"git clone -q -b </span><span class="si">{</span><span class="n">BRANCH</span><span class="si">}</span><span class="s2"> "</span>
-            <span class="sa">f</span><span class="s2">"https://github.com/AhmadKevin000/Project-PCVK.git </span><span class="si">{</span><span class="n">REPO</span><span class="si">}</span><span class="s2">"</span>
-        <span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">REPO</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-            <span class="s2">"Clone gagal. Cek apakah branch sudah di-push ke GitHub, "</span>
-            <span class="s2">"atau pakai jalur manual (upload zip) di Docs/COLAB.md"</span>
-        <span class="p">)</span>
-
-    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">REPO</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="sa">f</span><span class="s2">"git clone -q -b </span><span class="si">{</span><span class="n">BRANCH</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">URL</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">REPO</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">REPO</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">REPO</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="s2">"Clone gagal dan src/ tidak ditemukan. Lihat Docs/COLAB.md "</span>
+                <span class="s2">"bagian 'Jalur B' untuk menyiapkan berkas secara manual."</span>
+            <span class="p">)</span>
 
     <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">"pip -q install huggingface_hub"</span><span class="p">)</span>
 
-    <span class="n">jumlah</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">((</span><span class="n">REPO</span> <span class="o">/</span> <span class="s2">"sipakmed_raw"</span><span class="p">)</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">"*.bmp"</span><span class="p">)))</span> <span class="k">if</span> <span class="p">(</span><span class="n">REPO</span> <span class="o">/</span> <span class="s2">"sipakmed_raw"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="n">jumlah</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">"sipakmed_raw"</span><span class="p">)</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">"*.bmp"</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"sipakmed_raw"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+        <span class="k">else</span> <span class="mi">0</span>
+    <span class="p">)</span>
     <span class="k">if</span> <span class="n">jumlah</span> <span class="o">!=</span> <span class="mi">4049</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Dataset belum lengkap (</span><span class="si">{</span><span class="n">jumlah</span><span class="si">}</span><span class="s2">/4049), mengunduh ..."</span><span class="p">)</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">"python scripts/unduh_dataset.py sipakmed_raw"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"scripts/unduh_dataset.py"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">"python scripts/unduh_dataset.py sipakmed_raw"</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">huggingface_hub</span><span class="w"> </span><span class="kn">import</span> <span class="n">snapshot_download</span>
+
+            <span class="n">snapshot_download</span><span class="p">(</span>
+                <span class="n">repo_id</span><span class="o">=</span><span class="s2">"rjaditya/sipakmed-dataset"</span><span class="p">,</span>
+                <span class="n">repo_type</span><span class="o">=</span><span class="s2">"dataset"</span><span class="p">,</span>
+                <span class="n">allow_patterns</span><span class="o">=</span><span class="p">[</span><span class="s2">"images/*/*/CROPPED/*.bmp"</span><span class="p">],</span>
+                <span class="n">local_dir</span><span class="o">=</span><span class="s2">"sipakmed_raw"</span><span class="p">,</span>
+                <span class="n">max_workers</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+            <span class="p">)</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Siap di: </span><span class="si">{</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
@@ -7934,7 +7963,7 @@ tahap fitur (CSV kecil), bukan citranya.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=8d5ae6b6">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=21198731">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7993,7 +8022,7 @@ pandas    : 3.1.1
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=8be82f27">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=e3076b65">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8015,7 +8044,7 @@ kenyataan.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=8293c8f0">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=d50c9c48">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8060,7 +8089,13 @@ kenyataan.</p>
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>Dataset : C:\Users\radit\Project-PCVK\sipakmed_raw
-Total citra    : 4049
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Total citra    : 4049
 Jumlah kelas   : 5
 Jumlah klaster : 966
 Sel per klaster: 1 - 26
@@ -8163,7 +8198,7 @@ Jumlah per kelas (dibandingkan dengan angka resmi Plissiti et al. 2018):
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=2905ffd7">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a3ad73a7">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8179,7 +8214,7 @@ mengabaikan klaster. Keduanya kurang tepat untuk dataset ini.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=f6cce127">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=e1a4b99f">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8338,7 +8373,7 @@ Disimpan: data/metadata.csv dan outputs/rekap_fold.csv
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=707489c1">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a6902227">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8353,7 +8388,7 @@ yang sama tidak akan terpisah antara data latih dan data uji.</p>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=ec09f88e">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=e0188a66">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8393,7 +8428,7 @@ sekadar diklaim:</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=113d9014">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=2b3ebf25">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8430,7 +8465,7 @@ V3: V0 + median + CLAHE (uji urutan)
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=7d3d2a56">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c425560f">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8440,7 +8475,7 @@ V3: V0 + median + CLAHE (uji urutan)
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=4a4ebdd2">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=2b9f2aa6">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8470,9 +8505,21 @@ V3: V0 + median + CLAHE (uji urutan)
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Citra mentah : shape=(112, 109, 3), dtype=uint8, min=35, max=169
+<pre>Citra mentah : shape=(112, 109, 3), dtype=uint8, min=35, max=169</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>
 
-V0: shape=(224, 224), dtype=uint8, min= 42, max=164, mean=100.83, std=30.27
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>V0: shape=(224, 224), dtype=uint8, min= 42, max=164, mean=100.83, std=30.27
 V1: shape=(224, 224), dtype=uint8, min= 36, max=194, mean=114.10, std=35.49
 V2: shape=(224, 224), dtype=uint8, min= 38, max=192, mean=114.10, std=35.41
 V3: shape=(224, 224), dtype=uint8, min= 38, max=192, mean=114.04, std=35.63
@@ -8482,7 +8529,7 @@ V3: shape=(224, 224), dtype=uint8, min= 38, max=192, mean=114.04, std=35.63
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=82338623">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a85a0f9e">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8497,7 +8544,7 @@ yang hanya kelihatan di mata:</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=cd62e92a">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=d9994dc8">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8557,7 +8604,7 @@ yang hanya kelihatan di mata:</p>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=1a2335f1">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=5f24384f">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8568,7 +8615,7 @@ V3 memasangnya <strong>sebelum</strong>. Mana yang lebih baik harus diuji, bukan
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=31ce4b3f">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=326eaedf">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8604,7 +8651,7 @@ V3 memasangnya <strong>sebelum</strong>. Mana yang lebih baik harus diuji, bukan
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=41d440aa">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=0623d10d">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8621,7 +8668,7 @@ tetap mewakili kelima kelas.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=a73add59">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=53a45817">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8766,7 +8813,7 @@ Disimpan: outputs/statistik_praproses.csv
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=253687d7">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=dd902f09">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8818,7 +8865,7 @@ Disimpan: outputs/statistik_praproses.csv
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=9c0dbbfe">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=dcd26aea">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8833,7 +8880,7 @@ statistiknya pada sampel, tidak perlu disimpan seluruhnya.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=0d873ed5">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=74ac496f">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8927,7 +8974,7 @@ statistiknya pada sampel, tidak perlu disimpan seluruhnya.</p>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>V0: shape=(4049, 224, 224), dtype=uint8, total=7.0s, rata-rata=1.7 ms/citra
+<pre>V0: shape=(4049, 224, 224), dtype=uint8, total=22.6s, rata-rata=5.5 ms/citra
      disimpan: data/cache/X_V0.npy  (203 MB)
 
 </pre>
@@ -8992,19 +9039,19 @@ statistiknya pada sampel, tidak perlu disimpan seluruhnya.</p>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>V2: shape=(4049, 224, 224), dtype=uint8, total=3.9s, rata-rata=0.9 ms/citra
+<pre>V2: shape=(4049, 224, 224), dtype=uint8, total=20.8s, rata-rata=5.0 ms/citra
      disimpan: data/cache/X_V2.npy  (203 MB)
 
 Ringkasan waktu:
-  V0:    7.0 s total,   1.7 ms/citra
-  V2:    3.9 s total,   0.9 ms/citra
+  V0:   22.6 s total,   5.5 ms/citra
+  V2:   20.8 s total,   5.0 ms/citra
 </pre>
 </div>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=24303ce3">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=b0aa48ea">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9014,7 +9061,7 @@ Ringkasan waktu:
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=0d076858">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=9dabdace">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9075,7 +9122,7 @@ Semua pemeriksaan lolos.
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c1988c0f">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a253414c">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9086,7 +9133,7 @@ dijelaskan", bukan sekadar disebut.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=09f74037">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=81ffe81a">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>

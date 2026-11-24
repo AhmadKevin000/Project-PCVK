@@ -35,9 +35,18 @@ langsung tanpa menjalankan ulang.
 md(r"""
 ## 0. Persiapan lingkungan
 
-Kalau notebook ini dibuka di Colab, cell di bawah menyiapkan semuanya:
-clone repo, pindah ke foldernya, pasang `huggingface_hub`, lalu unduh dataset
-kalau belum ada.
+Kalau notebook ini dibuka di Colab, cell di bawah menyiapkan lingkungan:
+menyediakan `src/`, memasang `huggingface_hub`, lalu mengunduh dataset kalau
+belum lengkap.
+
+**Clone repo tidak wajib.** Cell ini punya dua mode:
+
+1. **Clone otomatis** (default) — paling praktis, selalu dapat versi terbaru.
+2. **Unggah manual** — kalau `src/dataset.py` dan `src/preprocessing.py` sudah
+   diunggah ke `/content/src/`, cell ini memakai itu dan tidak meng-clone apa pun.
+
+Yang benar-benar wajib hanya tiga: dua modul di `src/`, dataset 4049 citra, dan
+notebook ini.
 
 Kalau dijalankan di laptop, cell ini tidak melakukan apa-apa — langsung lanjut.
 
@@ -57,27 +66,48 @@ print(f"Google Colab: {DI_COLAB}")
 if DI_COLAB:
     REPO = Path("/content/Project-PCVK")
     BRANCH = "radita"
+    URL = "https://github.com/AhmadKevin000/Project-PCVK.git"
 
-    if not REPO.exists():
+    # Dua cara menyiapkan kode: clone repo, atau unggah src/ secara manual.
+    # Clone lebih praktis karena selalu dapat versi terbaru, tapi tidak wajib.
+    if REPO.exists():
+        os.chdir(REPO)
+        print("Memakai repo hasil clone")
+    elif Path("/content/src/dataset.py").exists():
+        os.chdir("/content")
+        print("Mode unggah manual: memakai /content/src")
+    else:
         print("Meng-clone repo ...")
-        os.system(
-            f"git clone -q -b {BRANCH} "
-            f"https://github.com/AhmadKevin000/Project-PCVK.git {REPO}"
-        )
-    if not REPO.exists():
-        raise RuntimeError(
-            "Clone gagal. Cek apakah branch sudah di-push ke GitHub, "
-            "atau pakai jalur manual (upload zip) di Docs/COLAB.md"
-        )
-
-    os.chdir(REPO)
+        os.system(f"git clone -q -b {BRANCH} {URL} {REPO}")
+        if REPO.exists():
+            os.chdir(REPO)
+        else:
+            raise RuntimeError(
+                "Clone gagal dan src/ tidak ditemukan. Lihat Docs/COLAB.md "
+                "bagian 'Jalur B' untuk menyiapkan berkas secara manual."
+            )
 
     os.system("pip -q install huggingface_hub")
 
-    jumlah = len(list((REPO / "sipakmed_raw").rglob("*.bmp"))) if (REPO / "sipakmed_raw").exists() else 0
+    jumlah = (
+        len(list(Path("sipakmed_raw").rglob("*.bmp")))
+        if Path("sipakmed_raw").exists()
+        else 0
+    )
     if jumlah != 4049:
         print(f"Dataset belum lengkap ({jumlah}/4049), mengunduh ...")
-        os.system("python scripts/unduh_dataset.py sipakmed_raw")
+        if Path("scripts/unduh_dataset.py").exists():
+            os.system("python scripts/unduh_dataset.py sipakmed_raw")
+        else:
+            from huggingface_hub import snapshot_download
+
+            snapshot_download(
+                repo_id="rjaditya/sipakmed-dataset",
+                repo_type="dataset",
+                allow_patterns=["images/*/*/CROPPED/*.bmp"],
+                local_dir="sipakmed_raw",
+                max_workers=16,
+            )
 
     print(f"Siap di: {Path.cwd()}")
 """)

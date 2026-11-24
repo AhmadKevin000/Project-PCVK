@@ -106,6 +106,37 @@ Setelah itu **Runtime > Run all**, tapi lewati cell 0 (dataset sudah ada).
 
 ---
 
+## Jalur C — tanpa git sama sekali
+
+Kalau tidak mau berurusan dengan push maupun clone, clone memang **tidak wajib**.
+Yang wajib cuma tiga: `src/dataset.py`, `src/preprocessing.py`, dan datasetnya.
+
+1. Buka Colab, klik ikon folder di panel kiri → **Upload** → pilih
+   `C:\Users\radit\Project-PCVK\src\dataset.py` dan `preprocessing.py`
+2. Jalankan cell ini untuk merapikan letaknya:
+
+```python
+import os, shutil
+os.makedirs("/content/src", exist_ok=True)
+for f in ["dataset.py", "preprocessing.py"]:
+    shutil.move(f"/content/{f}", f"/content/src/{f}")
+```
+
+3. **File > Upload notebook** → pilih `notebooks/02_praproses.ipynb`
+4. **Runtime > Run all**
+
+Cell 0 akan mendeteksi `/content/src` dan langsung memakainya — tidak meng-clone
+apa pun. Dataset tetap diunduh otomatis (kodenya ada cadangan di dalam cell,
+jadi `scripts/unduh_dataset.py` juga tidak diperlukan).
+
+**Harga yang dibayar:** setiap kali isi `src/` berubah, semua orang harus
+unggah ulang. Akibatnya gampang terjadi versi berbeda antar anggota — Kevin
+pakai `preprocessing.py` versi lama, Yulike versi baru, dan hasilnya tidak
+sama tanpa ada yang sadar. Untuk proyek kelompok, ini sumber masalah yang
+lebih mahal daripada sekali push.
+
+---
+
 ## Menyimpan hasil ke Drive
 
 Mulai tahap fitur, simpan hasilnya. Tambahkan di akhir notebook:
