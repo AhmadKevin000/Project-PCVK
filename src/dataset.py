@@ -175,35 +175,53 @@ def buat_fold(
     n_splits: int = 5,
     seed: int = 42,
 ) -> pd.DataFrame:
-    """Bagi data menjadi n_splits fold dengan StratifiedGroupKFold.
+    """Bagi data menjadi n_splits fold: klaster utuh, kelas seimbang.
 
-    Kenapa StratifiedGroupKFold, bukan KFold atau GroupKFold:
-      - KFold / StratifiedKFold : mengabaikan klaster -> sel seklauster bisa
-        masuk train dan test sekaligus (data leakage).
-      - GroupKFold              : klaster aman, tetapi proporsi kelas per fold
-        bisa timpang karena tidak memperhatikan label.
-      - StratifiedGroupKFold    : klaster aman DAN proporsi kelas dijaga.
+    Kenapa tidak memakai StratifiedGroupKFold dari scikit-learn:
 
-    `groups` memakai kolom `grup` (kelas + cluster_id), BUKAN cluster_id
-    sendirian: nomor klaster berulang di tiap kelas, sehingga cluster_id
-    saja akan menggabungkan sediaan dari kelas berbeda.
+    Pembagiannya bergantung pada versi pustaka. Dengan data yang sama,
+    StratifiedGroupKFold di scikit-learn 1.9 menghasilkan fold 809-810 citra
+    dengan selisih proporsi kelas 0,1 poin, sedangkan versi yang dipakai
+    Google Colab menghasilkan fold 760-858 citra dengan selisih sampai 6,4
+    poin. Untuk proyek yang angkanya harus bisa direproduksi orang lain,
+    perilaku yang berubah-ubah antar versi seperti ini tidak bisa dipakai.
+
+    Algoritma di sini tidak bergantung versi pustaka sama sekali:
+
+    1. Untuk setiap kelas, hitung ukuran tiap klaster (jumlah sel di dalamnya).
+    2. Urutkan klaster dari yang terbesar.
+    3. Tempatkan klaster terbesar ke fold yang paling sedikit terisi, lalu
+       lanjut ke klaster berikutnya.
+
+    Karena setiap kelas dibagi sendiri-sendiri, tiap fold mendapat sekitar
+    1/n_splits dari setiap kelas. Jumlah citra per fold otomatis ikut
+    seimbang, sebab proporsi kelima kelas mirip (787-831 citra).
+
+    Ini varian greedy dari algoritma LPT (longest processing time), yang
+    selisihnya terbukti kecil untuk masalah penjadwalan seperti ini.
+
+    Parameter `seed` hanya dipakai untuk mengocok urutan klaster yang
+    ukurannya sama, supaya fold tidak selalu menerima klaster bernomor kecil.
+    Hasilnya tetap sama setiap kali dijalankan.
     """
-    from sklearn.model_selection import StratifiedGroupKFold
-
     df = df.copy()
-    df["fold"] = -1
+    peta: dict[str, int] = {}
 
-    pemisah = StratifiedGroupKFold(
-        n_splits=n_splits, shuffle=True, random_state=seed
-    )
-    for i, (_, idx_uji) in enumerate(
-        pemisah.split(df, y=df["label"], groups=df["grup"])
-    ):
-        df.loc[idx_uji, "fold"] = i
+    for _, sub in df.groupby("kelas", sort=True):
+        ukuran = sub.groupby("grup").size()
+        ukuran = ukuran.sample(frac=1.0, random_state=seed).sort_values(
+            ascending=False, kind="mergesort"
+        )
 
-    if (df["fold"] < 0).any():
-        raise RuntimeError("Ada baris yang belum mendapat fold.")
-    df["fold"] = df["fold"].astype(int)
+        beban = [0] * n_splits
+        for grup, n in ukuran.items():
+            # Fold dengan isi paling sedikit; kalau seri, pilih nomor terkecil
+            # supaya hasilnya tetap sama setiap kali dijalankan.
+            f = min(range(n_splits), key=lambda i: (beban[i], i))
+            beban[f] += n
+            peta[grup] = f
+
+    df["fold"] = df["grup"].map(peta).astype(int)
     return df
 
 
@@ -231,9 +249,12 @@ def periksa_fold(df: pd.DataFrame, toleransi_kelas: float = 0.02) -> tuple[pd.Da
     for f in sorted(df["fold"].unique()):
         sub = df[df["fold"] == f]
         proporsi = sub["kelas"].value_counts(normalize=True)
-        selisih_maks = max(
-            abs(proporsi.get(k, 0.0) - proporsi_global.get(k, 0.0)) for k in KELAS
-        )
+        selisih = {
+            k: abs(proporsi.get(k, 0.0) - proporsi_global.get(k, 0.0))
+            for k in KELAS
+        }
+        kelas_terburuk = max(selisih, key=lambda k: selisih[k])
+        selisih_maks = selisih[kelas_terburuk]
         baris.append(
             {
                 "fold": f,
@@ -244,9 +265,12 @@ def periksa_fold(df: pd.DataFrame, toleransi_kelas: float = 0.02) -> tuple[pd.Da
             }
         )
         if selisih_maks > toleransi_kelas:
+            n_dapat = int((sub["kelas"] == kelas_terburuk).sum())
+            n_harap = proporsi_global[kelas_terburuk] * len(sub)
             masalah.append(
-                f"Fold {f}: proporsi kelas melenceng {selisih_maks*100:.1f} poin "
-                f"(batas {toleransi_kelas*100:.0f} poin)"
+                f"Fold {f}: kelas {kelas_terburuk.replace('im_', '')} melenceng "
+                f"{selisih_maks * 100:.1f} poin "
+                f"({n_dapat} citra, seharusnya ~{n_harap:.0f})"
             )
 
     laporan = pd.DataFrame(baris).sort_values("fold").reset_index(drop=True)

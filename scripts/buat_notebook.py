@@ -195,13 +195,35 @@ df.head()
 md(r"""
 ## 2. Pembagian data
 
-`StratifiedGroupKFold(n_splits=5)` dengan `groups=grup` dan `y=label`.
+Lima fold dengan dua syarat: semua sel dari klaster yang sama harus berada di
+fold yang sama (anti-leakage), dan proporsi kelima kelas harus mirip di setiap
+fold (supaya metrik antar fold bisa dibandingkan).
 
-- **Group** -> semua sel dari klaster yang sama selalu berada di fold yang sama.
-- **Stratified** -> proporsi kelima kelas dijaga di setiap fold.
+### Kenapa tidak memakai `StratifiedGroupKFold`
 
-`GroupKFold` biasa tidak menjaga proporsi kelas, sedangkan `KFold` biasa
-mengabaikan klaster. Keduanya kurang tepat untuk dataset ini.
+Percobaan pertama memakai `StratifiedGroupKFold` dari scikit-learn. Di laptop
+(versi 1.9) hasilnya bagus: fold 809-810 citra, selisih proporsi kelas 0,1
+poin. Tetapi ketika notebook yang sama dijalankan di Google Colab, hasilnya
+fold 760-858 citra dengan selisih sampai **6,4 poin** — dan pemeriksaan di
+bawah menolaknya.
+
+Penyebabnya: algoritma pembagian di dalam scikit-learn berubah antar versi.
+Untuk proyek yang angkanya harus bisa direproduksi orang lain, pembagian data
+tidak boleh bergantung pada versi pustaka.
+
+### Pembagian yang dipakai sekarang
+
+Untuk setiap kelas:
+
+1. Hitung ukuran tiap klaster (jumlah sel di dalamnya).
+2. Urutkan klaster dari yang terbesar.
+3. Tempatkan klaster terbesar ke fold yang paling sedikit terisi, lalu lanjut
+   ke klaster berikutnya.
+
+Karena tiap kelas dibagi sendiri-sendiri, setiap fold mendapat sekitar
+seperlima dari setiap kelas — dan jumlah citra per fold otomatis ikut
+seimbang. Tidak ada angka acak yang berpengaruh, jadi hasilnya sama di mesin
+mana pun, versi pustaka apa pun.
 """)
 cd(r"""
 df = buat_fold(df, n_splits=5, seed=42)
