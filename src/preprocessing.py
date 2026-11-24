@@ -82,8 +82,12 @@ def ubah_ukuran(img: np.ndarray, ukuran: int = 224, jaga_aspek: bool = False) ->
         Pakai opsi ini kalau nanti menambahkan fitur bentuk seperti
         Hu moments.
 
-    Interpolasi dipilih otomatis: INTER_AREA saat memperkecil (mayoritas
-    citra SIPaKMeD lebih besar dari 224 px), INTER_CUBIC saat memperbesar.
+    Interpolasi dipilih otomatis: INTER_AREA saat memperkecil, INTER_CUBIC
+    saat memperbesar. Pada SIPaKMeD ukuran median citra hanya 188x166, jadi
+    mayoritas (2472 dari 4049, 61,1%) justru DIPERBESAR dengan INTER_CUBIC,
+    dan 1577 citra (38,9%) diperkecil dengan INTER_AREA. Konsekuensinya
+    tekstur dihitung pada piksel hasil interpolasi untuk sebagian besar
+    data; ini dicatat sebagai keterbatasan, bukan diabaikan.
     """
     h, w = img.shape[:2]
 
