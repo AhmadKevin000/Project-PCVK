@@ -108,3 +108,8 @@ Icon?
 .idea/
 *.swp
 *~
+
+# Artefak gambar: isinya sudah tertanam di dalam notebook.
+# File biner tidak bisa di-merge, jadi jangan masuk repo.
+outputs/*.png
+outputs/*.html
