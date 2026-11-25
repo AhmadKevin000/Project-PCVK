@@ -1,12 +1,47 @@
 # Menjalankan Proyek di Google Colab
 
-Panduan ini untuk anggota kelompok yang tidak mau (atau tidak bisa) memasang
-Python di laptopnya. Semua tahap — unduh dataset, praproses, sampai nanti
-ekstraksi fitur — bisa dikerjakan di Colab.
+Sejak notebook dibuat satu file, menjalankannya di Colab jadi jauh lebih
+sederhana: **tidak ada clone repo, tidak ada upload `src/`**. Semua kode ada di
+dalam notebook.
 
 ---
 
-## Ringkasan: apa yang hilang dan apa yang disimpan
+## Yang perlu disiapkan
+
+Cuma dua:
+
+1. Notebook `notebooks/02_praproses.ipynb` — sudah ada di GitHub.
+2. Akun Google. Tidak perlu Drive.
+
+Dataset tidak perlu disiapkan manual — notebook mengunduhnya sendiri.
+
+---
+
+## Langkah menjalankan
+
+1. Buka notebook dari GitHub di Colab:
+   `https://colab.research.google.com/github/AhmadKevin000/Project-PCVK/blob/radita/notebooks/02_praproses.ipynb`
+2. **Runtime → Run all**
+3. Tunggu:
+
+| Tahap | Waktu |
+|---|---|
+| Pasang `huggingface_hub` | ~10 detik |
+| Unduh dataset 562 MB / 4049 berkas | ~2 menit |
+| Bangun metadata + bagi fold | ~2 detik |
+| Praproses 4049 citra (V0 + V2) | ~30 detik |
+| Statistik 300 citra x 4 varian | ~40 detik |
+| **Total** | **~3–4 menit** |
+
+4. Kalau mau menyimpan hasilnya: **File → Save a copy in GitHub**. Ini yang
+   membuat output ikut tersimpan dan bisa dilihat orang lain.
+
+Kalau dijalankan di laptop, cell persiapan mencetak `Google Colab: False` lalu
+berhenti — tidak ada yang diunduh.
+
+---
+
+## Apa yang hilang tiap sesi tutup
 
 Colab menghapus seluruh isi `/content` setiap sesi berakhir. Jadi pahami dulu
 mana yang perlu dijaga:
@@ -19,127 +54,12 @@ mana yang perlu dijaga:
 | **Hasil ekstraksi fitur (CSV)** | ~3 MB | ya | **ya** |
 | Model `.joblib` | ~1 MB | ya | **ya** |
 
-Kesimpulannya: **tidak perlu mount Drive untuk tahap praproses.** Yang mahal
-itu mengunduh dan menghitung, dan keduanya cuma butuh beberapa menit. Drive
-baru mulai berguna di tahap fitur dan model, karena hasilnya kecil tapi butuh
-waktu untuk dibuat.
+Kesimpulannya: **tidak perlu mount Drive untuk tahap praproses.** Yang mahal itu
+mengunduh dan menghitung, dan keduanya cuma butuh beberapa menit. Drive baru
+mulai berguna di tahap fitur dan model, karena hasilnya kecil tapi butuh waktu
+untuk dibuat.
 
----
-
-## Jalur A — lewat GitHub (utama)
-
-### Sekali saja, dari laptop
-
-Branch harus ada di GitHub dulu. Kalau `git push` belum dilakukan, Colab akan
-meng-clone versi lama dan notebooknya gagal.
-
-```bash
-cd C:\Users\radit\Project-PCVK
-git push origin radita
-```
-
-### Setiap kali buka Colab
-
-1. Buka <https://colab.research.google.com>
-2. **File > Open notebook > GitHub**, tempel:
-   `https://github.com/AhmadKevin000/Project-PCVK/blob/radita/notebooks/02_praproses.ipynb`
-3. **Runtime > Run all**
-
-Selesai. Cell nomor 0 otomatis:
-
-- meng-clone repo ke `/content/Project-PCVK`
-- pindah ke folder itu
-- memasang `huggingface_hub`
-- mengunduh dataset kalau belum lengkap
-
-Kalau dijalankan di laptop, cell itu tidak melakukan apa-apa.
-
-### Perkiraan waktu di Colab
-
-| Tahap | Waktu |
-|---|---|
-| Clone repo | ~5 detik |
-| Unduh dataset 562 MB | 1–3 menit |
-| Praproses 4049 citra (2 varian) | ~40 detik |
-| **Total** | **~3 menit** |
-
----
-
-## Jalur B — lewat Google Drive (cadangan)
-
-Pakai jalur ini kalau:
-
-- mirror HuggingFace mati atau berubah, atau
-- koneksi ke HuggingFace lambat, atau
-- repo GitHub belum bisa diakses.
-
-### Sekali saja, dari laptop
-
-Buat satu file zip, lalu unggah ke Drive:
-
-```powershell
-cd C:\Users\radit\Project-PCVK
-Compress-Archive -Path sipakmed_raw\* -DestinationPath sipakmed_raw.zip
-```
-
-Unggah `sipakmed_raw.zip` ke `MyDrive/PCVK/`. Ukurannya sekitar 550 MB — BMP
-tidak banyak terkompresi, jadi memang sebesar itu. Ini lambat, tapi sekali
-saja, dan jadi asuransi kalau mirror-nya hilang.
-
-### Setiap kali buka Colab
-
-```python
-from google.colab import drive
-drive.mount("/content/drive")
-
-!git clone -q -b radita https://github.com/AhmadKevin000/Project-PCVK.git /content/Project-PCVK
-%cd /content/Project-PCVK
-!unzip -q /content/drive/MyDrive/PCVK/sipakmed_raw.zip -d sipakmed_raw
-```
-
-Setelah itu **Runtime > Run all**, tapi lewati cell 0 (dataset sudah ada).
-
-> **Jangan** menyimpan dataset ke Drive sebagai folder berisi 4049 file kecil.
-> Drive di Colab lambat untuk banyak file kecil — membaca satu citra bisa
-> memakan waktu setengah detik, dan 4049 citra jadi setengah jam. Satu file
-> zip jauh lebih cepat karena dibaca berurutan.
-
----
-
-## Jalur C — tanpa git sama sekali
-
-Kalau tidak mau berurusan dengan push maupun clone, clone memang **tidak wajib**.
-Yang wajib cuma tiga: `src/dataset.py`, `src/preprocessing.py`, dan datasetnya.
-
-1. Buka Colab, klik ikon folder di panel kiri → **Upload** → pilih
-   `C:\Users\radit\Project-PCVK\src\dataset.py` dan `preprocessing.py`
-2. Jalankan cell ini untuk merapikan letaknya:
-
-```python
-import os, shutil
-os.makedirs("/content/src", exist_ok=True)
-for f in ["dataset.py", "preprocessing.py"]:
-    shutil.move(f"/content/{f}", f"/content/src/{f}")
-```
-
-3. **File > Upload notebook** → pilih `notebooks/02_praproses.ipynb`
-4. **Runtime > Run all**
-
-Cell 0 akan mendeteksi `/content/src` dan langsung memakainya — tidak meng-clone
-apa pun. Dataset tetap diunduh otomatis (kodenya ada cadangan di dalam cell,
-jadi `scripts/unduh_dataset.py` juga tidak diperlukan).
-
-**Harga yang dibayar:** setiap kali isi `src/` berubah, semua orang harus
-unggah ulang. Akibatnya gampang terjadi versi berbeda antar anggota — Kevin
-pakai `preprocessing.py` versi lama, Yulike versi baru, dan hasilnya tidak
-sama tanpa ada yang sadar. Untuk proyek kelompok, ini sumber masalah yang
-lebih mahal daripada sekali push.
-
----
-
-## Menyimpan hasil ke Drive
-
-Mulai tahap fitur, simpan hasilnya. Tambahkan di akhir notebook:
+Mulai tahap fitur, tambahkan di akhir notebook:
 
 ```python
 from google.colab import drive
@@ -151,16 +71,64 @@ shutil.copy("data/fitur_glcm_lbp.csv", "/content/drive/MyDrive/PCVK/")
 
 ---
 
+## Karena notebook cuma satu, aturan gantian
+
+Satu file berarti tidak ada pembagian otomatis. Kalau dua orang membuka dan
+menyimpan bersamaan, yang satu akan menimpa yang lain. Empat aturan:
+
+1. **Satu orang pegang satu waktu.** Bilang di grup sebelum mulai.
+2. **Pull sebelum mulai, push begitu selesai.** Jangan tinggalkan notebook
+   dalam keadaan sudah diedit tapi belum di-push.
+3. **Jangan commit setengah jalan.** Kalau mau berhenti, push dulu walau belum
+   rapi.
+4. **Soal output:** selama kerja harian, bersihkan output sebelum commit supaya
+   diff-nya kecil dan tidak bentrok. Saat mau dikumpulkan atau dinilai, Run all
+   lalu simpan lengkap.
+
+Kalau aturan ini dilewat, gejalanya khas: notebook berubah 3000+ baris padahal
+isinya cuma "dijalankan ulang", dan `git pull` jadi konflik yang tidak bisa
+diselesaikan manual.
+
+---
+
+## Kalau mirror HuggingFace bermasalah
+
+Dataset diunduh dari mirror `rjaditya/sipakmed-dataset`. Kalau mirror itu mati
+atau sangat lambat, siapkan sekali dari laptop:
+
+```powershell
+cd C:\Users\radit\Project-PCVK
+Compress-Archive -Path sipakmed_raw\* -DestinationPath sipakmed_raw.zip
+```
+
+Unggah `sipakmed_raw.zip` ke `MyDrive/PCVK/`, lalu di Colab sebelum Run all:
+
+```python
+from google.colab import drive
+drive.mount("/content/drive")
+!unzip -q /content/drive/MyDrive/PCVK/sipakmed_raw.zip -d /content/sipakmed_raw
+```
+
+Setelah itu lewati cell persiapan (dataset sudah ada) dan lanjut Run all.
+
+> **Jangan** menyimpan dataset ke Drive sebagai folder berisi 4049 file kecil.
+> Drive di Colab lambat untuk banyak file kecil — membaca satu citra bisa
+> memakan waktu setengah detik, dan 4049 citra jadi setengah jam. Satu file zip
+> jauh lebih cepat karena dibaca berurutan.
+
+---
+
 ## Masalah yang sering muncul
 
 | Gejala | Penyebab | Solusi |
 |---|---|---|
-| `git clone` gagal / folder kosong | branch belum di-push, atau repo privat | jalankan `git push origin radita` dari laptop |
+| `Dataset belum lengkap (0/4049), mengunduh ...` | normal di sesi baru | tunggu, jangan dihentikan |
+| Unduhan berhenti di tengah | sesi terputus | jalankan ulang cell persiapan — `snapshot_download` melanjutkan, bukan mengulang dari nol |
+| `NameError: name 'preprocess' is not defined` | cell fungsi belum dijalankan | **Run all**, jangan loncat ke cell bawah |
 | `ModuleNotFoundError: cv2` | lingkungan Colab direset | `!pip install opencv-python-headless` |
-| Unduhan berhenti di tengah | sesi terputus | jalankan ulang cell 0 — `snapshot_download` melanjutkan, bukan mengulang dari nol |
-| `KeyError: 'kelas'` | notebook versi lama | `git pull` di repo, buka ulang notebooknya |
-| Hasil beda dengan laptop | dataset belum lengkap | cek jumlah BMP harus **4049**, bukan 4048 |
-| Sesi mati saat praproses | batas waktu Colab gratis | jalankan ulang; prosesnya cuma 40 detik |
+| Hasil hilang saat tab ditutup | belum *Save a copy in GitHub* | ulangi, kali ini simpan |
+| Angka fold berbeda dari laporan | dataset beda atau kode berubah | cek `periksa_fold` — splitter-nya deterministik, jadi seharusnya persis sama |
+| RAM habis / kernel mati | menyimpan semua varian `.npy` sekaligus | notebook ini hanya menyimpan V0 dan V2 |
 
 ---
 
@@ -168,8 +136,9 @@ shutil.copy("data/fitur_glcm_lbp.csv", "/content/drive/MyDrive/PCVK/")
 
 Angka di laporan harus bisa dihasilkan ulang oleh orang lain. Karena itu:
 
-- Pembagian fold memakai `random_state=42` — hasilnya selalu sama.
+- Pembagian fold memakai `random_state=42` dan algoritma greedy yang ditulis
+  sendiri — hasilnya sama di mesin mana pun, tidak bergantung versi scikit-learn.
 - Urutan baris metadata diurutkan deterministik (`label`, `cluster_id`, `sel_ke`),
   sehingga indeks ke-`i` di cache `.npy` selalu merujuk citra yang sama.
-- Versi pustaka ikut dicatat di cell pertama. Kalau angka berbeda jauh di
-  mesin lain, cek dulu versi OpenCV-nya.
+- Versi pustaka ikut dicetak di cell kedua. Kalau angka berbeda jauh di mesin
+  lain, cek dulu versi OpenCV-nya.
